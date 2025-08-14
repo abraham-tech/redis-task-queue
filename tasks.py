@@ -3,6 +3,10 @@ import smtplib
 from email.mime.text import MIMEText
 from rq import get_current_job
 
+# Add import for PDF generation
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 def print_message(msg, extra):
     job = get_current_job()
     print(f"Worker says: {msg}")
@@ -38,3 +42,18 @@ def send_email(recipient, subject, body):
         print("Email sent! If using MailHog, check http://localhost:8025")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+def generate_pdf_report(filename, content):
+    """
+    Generates a PDF report with the given content and saves it to disk.
+    """
+    job = get_current_job()
+    print(f"Generating PDF report: {filename} (Job ID: {job.id if job else 'N/A'})")
+    try:
+        c = canvas.Canvas(filename, pagesize=letter)
+        width, height = letter
+        c.drawString(100, height - 100, content)
+        c.save()
+        print(f"PDF report saved as {filename}")
+    except Exception as e:
+        print(f"Failed to generate PDF: {e}")
