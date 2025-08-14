@@ -1,12 +1,30 @@
+import time
+import random
+import string
 from rq import Queue
 from redis import Redis
-from tasks import print_message
+from tasks import print_message, send_email
 
-if __name__ == "__main__":
-    # Connect to Redis running in Docker
-    redis_conn = Redis(host='redis', port=6379)
-    # Create a queue
-    q = Queue(connection=redis_conn)
-    # Enqueue a job
-    job = q.enqueue(print_message, 'Hello from the queue!', 'This is an extra argument!')
-    print(f"Enqueued job: {job.id}")
+redis_conn = Redis(host='redis', port=6379)
+q = Queue(connection=redis_conn)
+
+while True:
+    # Enqueue print_message as before
+    job1 = q.enqueue(print_message, 'Hello from the queue!', 'This is an extra argument!')
+    print(f"Enqueued job: {job1.id}")
+
+    time.sleep(1)  # Wait one second before sending the email
+
+    # Generate a random email address
+    random_email = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8)) + "@example.com"
+
+    # Enqueue send_email example (view in MailHog web UI at http://localhost:8025)
+    job2 = q.enqueue(
+        send_email,
+        random_email,  # Random recipient
+        "Test Subject",
+        "This is the body of the email."
+    )
+    print(f"Enqueued email job: {job2.id} to {random_email} (Check MailHog at http://localhost:8025)")
+
+    time.sleep(1)  # Wait one second before next iteration

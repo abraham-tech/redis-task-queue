@@ -4,12 +4,23 @@ services:
     image: redis:7
     ports:
       - "6379:6379"
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
   app:
     build: .
     depends_on:
       - redis
+      - mailhog
     environment:
       - REDIS_HOST=redis
+      - SMTP_SERVER=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_SENDER=anything@example.com
     volumes:
       - .:/app
     command: python producer.py
@@ -17,8 +28,14 @@ services:
     build: .
     depends_on:
       - redis
+      - mailhog
     environment:
       - REDIS_HOST=redis
+      - SMTP_SERVER=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_SENDER=anything@example.com
     volumes:
       - .:/app
     command: python worker.py
