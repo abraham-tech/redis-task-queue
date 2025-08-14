@@ -9,6 +9,14 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+  rq-dashboard:
+    image: eoranged/rq-dashboard
+    ports:
+      - "9181:9181"
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
   app:
     build: .
     depends_on:
