@@ -12,4 +12,13 @@ services:
       - REDIS_HOST=redis
     volumes:
       - .:/app
-    command: python hello_redis.py
+    command: python producer.py
+  worker:
+    build: .
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      - .:/app
+    command: python worker.py
