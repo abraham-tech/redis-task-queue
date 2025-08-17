@@ -355,20 +355,52 @@ Welcome! This hands-on course will guide you through building a **Background Job
 
 ## 7. Monitoring & Admin Panel
 
-**Goal:** Visualize your queues and jobs.
+**Goal:** Visualize your queues and jobs in real time using RQ Dashboard.
 
-### Steps
+### What is RQ Dashboard?
+RQ Dashboard is a web-based admin panel for monitoring your Redis Queue (RQ) jobs, workers, and queues. It provides a live view of your background job system, making it easy to track job status, requeue failed jobs, and monitor worker health.
 
-1. **Install RQ Dashboard**
-   ```bash
-   pip install rq-dashboard
-   ```
-2. **Run the Dashboard**
-   ```bash
-   rq-dashboard
-   ```
-   - Visit [http://localhost:9181](http://localhost:9181)
-   - See active, queued, and failed jobs in real time.
+### How to Use
+
+1. **Start the Dashboard Service**
+   - The dashboard is included as a service in your `docker-compose.yml`.
+   - Start it (and all other services) with:
+     ```bash
+     docker-compose up --build
+     ```
+   - Or, to start just the dashboard:
+     ```bash
+     docker-compose up -d dashboard
+     ```
+
+2. **Access the Dashboard**
+   - Open your browser and go to:
+     - [http://localhost:9181](http://localhost:9181) (from your local machine)
+     - Or, from another device on your network: `http://<your-computer-ip>:9181`
+
+3. **What You Can Do**
+   - **View Queues:** See all active, queued, scheduled, and failed jobs.
+   - **Inspect Jobs:** Click on jobs to see their arguments, results, and traceback if failed.
+   - **Requeue or Delete Jobs:** Manually requeue failed jobs or remove them.
+   - **Monitor Workers:** See which workers are online and what jobs they are processing.
+   - **Live Updates:** The dashboard updates in real time as jobs are enqueued and processed.
+
+4. **Troubleshooting**
+   - If you can't access the dashboard:
+     - Make sure the dashboard service is running: `docker-compose ps`
+     - Check logs for errors: `docker-compose logs dashboard`
+     - Ensure port 9181 is not blocked by a firewall and is mapped in `docker-compose.yml`.
+     - If you want to restrict access to localhost only, change the port mapping to `127.0.0.1:9181:9181` in your compose file.
+
+5. **Security Note**
+   - By default, the dashboard is accessible to anyone on your local network. For production, consider securing access with authentication or firewall rules.
+
+---
+
+**Summary:**
+- RQ Dashboard gives you a powerful, real-time view of your background job system.
+- You can monitor, manage, and troubleshoot jobs and workers easily from your browser.
+- This is an essential tool for maintaining a healthy background processing system.
 
 ---
 
