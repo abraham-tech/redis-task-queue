@@ -1,3 +1,4 @@
-rq
 redis
+rq
+rq-scheduler
 reportlab

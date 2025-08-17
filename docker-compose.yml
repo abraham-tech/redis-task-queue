@@ -1,49 +1,58 @@
-version: '3.8'
-services:
-  redis:
-    image: redis:7
+version: '3.8'  # Docker Compose file format version
+services:  # Define all services (containers) for this app
+  redis:  # Redis service (database)
+    image: redis:7  # Use the official Redis image, version 7
     ports:
-      - "6379:6379"
-  mailhog:
+      - "6379:6379"  # Map port 6379 on host to 6379 in container
+  mailhog:  # Mailhog service (for testing emails)
     image: mailhog/mailhog
     ports:
-      - "1025:1025"
-      - "8025:8025"
-  rq-dashboard:
+      - "1025:1025"  # Map port 1025 on host to 1025 in container
+      - "8025:8025"  # Map port 8025 on host to 8025 in container
+  rq-dashboard:  # RQ Dashboard service (for monitoring queues)
     image: eoranged/rq-dashboard
     ports:
-      - "9181:9181"
+      - "9181:9181"  # Map port 9181 on host to 9181 in container
     environment:
-      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0  # Set environment variable for Redis URL
     depends_on:
-      - redis
-  app:
-    build: .
+      - redis  # Wait for Redis to be ready before starting
+  app:  # Producer app service
+    build: .  # Build image from Dockerfile in current directory
     depends_on:
-      - redis
-      - mailhog
+      - redis  # Wait for Redis to be ready before starting
+      - mailhog  # Wait for Mailhog to be ready before starting
     environment:
-      - REDIS_HOST=redis
-      - SMTP_SERVER=mailhog
-      - SMTP_PORT=1025
-      - SMTP_USER=
-      - SMTP_PASSWORD=
-      - SMTP_SENDER=anything@example.com
+      - REDIS_HOST=redis  # Set environment variable for Redis host
+      - SMTP_SERVER=mailhog  # Set environment variable for SMTP server
+      - SMTP_PORT=1025  # Set environment variable for SMTP port
+      - SMTP_USER=  # Set environment variable for SMTP username
+      - SMTP_PASSWORD=  # Set environment variable for SMTP password
+      - SMTP_SENDER=anything@example.com  # Set environment variable for SMTP sender
     volumes:
-      - .:/app
-    command: python producer.py
-  worker:
-    build: .
+      - .:/app  # Mount current directory to /app in container (for live code updates)
+    command: python producer.py  # Run the producer script
+  worker:  # Worker service (processes jobs)
+    build: .  # Build image from Dockerfile in current directory
     depends_on:
-      - redis
-      - mailhog
+      - redis  # Wait for Redis to be ready before starting
+      - mailhog  # Wait for Mailhog to be ready before starting
     environment:
-      - REDIS_HOST=redis
-      - SMTP_SERVER=mailhog
-      - SMTP_PORT=1025
-      - SMTP_USER=
-      - SMTP_PASSWORD=
-      - SMTP_SENDER=anything@example.com
+      - REDIS_HOST=redis  # Set environment variable for Redis host
+      - SMTP_SERVER=mailhog  # Set environment variable for SMTP server
+      - SMTP_PORT=1025  # Set environment variable for SMTP port
+      - SMTP_USER=  # Set environment variable for SMTP username
+      - SMTP_PASSWORD=  # Set environment variable for SMTP password
+      - SMTP_SENDER=anything@example.com  # Set environment variable for SMTP sender
     volumes:
-      - .:/app
-    command: python worker.py
+      - .:/app  # Mount current directory to /app in container (for live code updates)
+    command: python worker.py  # Run the worker script
+  scheduler:  # Scheduler service (schedules jobs)
+    build: .  # Build image from Dockerfile in current directory
+    depends_on:
+      - redis  # Wait for Redis to be ready before starting
+    environment:
+      - REDIS_HOST=redis  # Set environment variable for Redis host
+    volumes:
+      - .:/app  # Mount current directory to /app in container (for live code updates)
+    command: rqscheduler --host redis --port 6379 --interval 10  # Run RQ Scheduler, check every 10 seconds

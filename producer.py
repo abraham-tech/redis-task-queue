@@ -27,12 +27,10 @@ while True:
     )
     print(f"Enqueued email job: {job2.id} to {random_email} (Check MailHog at http://localhost:8025)")
 
-    time.sleep(1)  # Wait one second before next iteration
+
 
     # Enqueue generate_pdf_report job
-    random_filename = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8)) + ".pdf"
-    random_content = 'PDF Report Content: ' + ''.join(random.choices(string.ascii_letters + string.digits, k=20))
-    job3 = q.enqueue(generate_pdf_report, random_filename, random_content)
-    print(f"Enqueued PDF report job: {job3.id} to generate {random_filename}")
-
-    time.sleep(1)  # Wait one second before next iteration
+    # random_filename = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8)) + ".pdf"
+    # random_content = 'PDF Report Content: ' + ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+    # job3 = q.enqueue(generate_pdf_report, random_filename, random_content)
+    # print(f"Enqueued PDF report job: {job3.id} to generate {random_filename}")
