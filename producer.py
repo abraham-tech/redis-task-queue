@@ -4,6 +4,7 @@ import string
 from rq import Queue
 from redis import Redis
 from tasks import print_message, send_email, generate_pdf_report
+from image_tasks import resize_image
 
 redis_conn = Redis(host='redis', port=6379)
 q = Queue(connection=redis_conn)
@@ -34,3 +35,14 @@ while True:
     # random_content = 'PDF Report Content: ' + ''.join(random.choices(string.ascii_letters + string.digits, k=20))
     # job3 = q.enqueue(generate_pdf_report, random_filename, random_content)
     # print(f"Enqueued PDF report job: {job3.id} to generate {random_filename}")
+
+if __name__ == "__main__":
+    # Connect to Redis running in Docker
+    redis_conn = Redis(host='redis', port=6379, db=0)
+    # Create a queue
+    q = Queue(connection=redis_conn)
+
+    # Enqueue an image resize job
+    # This will resize 'input.jpg' to 400x300 pixels and save as 'output.jpg'
+    job = q.enqueue(resize_image, 'input.jpg', 'output.jpg', (400, 300))
+    print(f"Enqueued image resize job: {job.id}")

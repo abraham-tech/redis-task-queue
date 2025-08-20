@@ -4,31 +4,12 @@ services:  # Define all services (containers) for this app
     image: redis:7  # Use the official Redis image, version 7
     ports:
       - "6379:6379"  # Map port 6379 on host to 6379 in container
-  mailhog:  # Mailhog service (for testing emails)
-    image: mailhog/mailhog
-    ports:
-      - "1025:1025"  # Map port 1025 on host to 1025 in container
-      - "8025:8025"  # Map port 8025 on host to 8025 in container
-  rq-dashboard:  # RQ Dashboard service (for monitoring queues)
-    image: eoranged/rq-dashboard
-    ports:
-      - "9181:9181"  # Map port 9181 on host to 9181 in container
-    environment:
-      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0  # Set environment variable for Redis URL
-    depends_on:
-      - redis  # Wait for Redis to be ready before starting
   app:  # Producer app service
     build: .  # Build image from Dockerfile in current directory
     depends_on:
       - redis  # Wait for Redis to be ready before starting
-      - mailhog  # Wait for Mailhog to be ready before starting
     environment:
       - REDIS_HOST=redis  # Set environment variable for Redis host
-      - SMTP_SERVER=mailhog  # Set environment variable for SMTP server
-      - SMTP_PORT=1025  # Set environment variable for SMTP port
-      - SMTP_USER=  # Set environment variable for SMTP username
-      - SMTP_PASSWORD=  # Set environment variable for SMTP password
-      - SMTP_SENDER=anything@example.com  # Set environment variable for SMTP sender
     volumes:
       - .:/app  # Mount current directory to /app in container (for live code updates)
     command: python producer.py  # Run the producer script
@@ -36,14 +17,8 @@ services:  # Define all services (containers) for this app
     build: .  # Build image from Dockerfile in current directory
     depends_on:
       - redis  # Wait for Redis to be ready before starting
-      - mailhog  # Wait for Mailhog to be ready before starting
     environment:
       - REDIS_HOST=redis  # Set environment variable for Redis host
-      - SMTP_SERVER=mailhog  # Set environment variable for SMTP server
-      - SMTP_PORT=1025  # Set environment variable for SMTP port
-      - SMTP_USER=  # Set environment variable for SMTP username
-      - SMTP_PASSWORD=  # Set environment variable for SMTP password
-      - SMTP_SENDER=anything@example.com  # Set environment variable for SMTP sender
     volumes:
       - .:/app  # Mount current directory to /app in container (for live code updates)
     command: python worker.py  # Run the worker script
@@ -56,3 +31,12 @@ services:  # Define all services (containers) for this app
     volumes:
       - .:/app  # Mount current directory to /app in container (for live code updates)
     command: rqscheduler --host redis --port 6379 --interval 10  # Run RQ Scheduler, check every 10 seconds
+  dashboard:  # RQ Dashboard service (web UI for monitoring)
+    build: .  # Use the same image as app/worker
+    depends_on:
+      - redis  # Wait for Redis to be ready before starting
+    environment:
+      - REDIS_HOST=redis  # Set environment variable for Redis host
+    ports:
+      - "9181:9181"  # Expose port 9181 for the dashboard web UI
+    command: rq-dashboard --port 9181 --redis-host redis  # Start RQ Dashboard with correct options
