@@ -2,3 +2,5 @@ redis
 rq
 rq-scheduler
 reportlab
+rq-dashboard
+Pillow
